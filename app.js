@@ -135,3 +135,90 @@ legend.innerHTML = `
 `;
 
 document.body.appendChild(legend);
+// ==============================
+// LIVE WEATHER API BONUS FEATURE
+// ==============================
+
+// Create weather information panel
+var weatherPanel = document.createElement('div');
+weatherPanel.style.position = 'absolute';
+weatherPanel.style.top = '80px';
+weatherPanel.style.left = '25px';
+weatherPanel.style.padding = '12px';
+weatherPanel.style.background = 'rgba(0, 0, 0, 0.75)';
+weatherPanel.style.color = 'white';
+weatherPanel.style.fontSize = '13px';
+weatherPanel.style.borderRadius = '8px';
+weatherPanel.style.zIndex = '999';
+weatherPanel.style.maxWidth = '260px';
+
+weatherPanel.innerHTML = '<b>Live Trail Weather</b><br>Loading weather data...';
+
+document.body.appendChild(weatherPanel);
+
+// Convert weather code to readable description
+function getWeatherDescription(code) {
+  var descriptions = {
+    0: 'Clear sky',
+    1: 'Mainly clear',
+    2: 'Partly cloudy',
+    3: 'Overcast',
+    45: 'Fog',
+    48: 'Depositing rime fog',
+    51: 'Light drizzle',
+    53: 'Moderate drizzle',
+    55: 'Dense drizzle',
+    61: 'Slight rain',
+    63: 'Moderate rain',
+    65: 'Heavy rain',
+    71: 'Slight snow',
+    73: 'Moderate snow',
+    75: 'Heavy snow',
+    80: 'Slight rain showers',
+    81: 'Moderate rain showers',
+    82: 'Violent rain showers',
+    95: 'Thunderstorm'
+  };
+
+  return descriptions[code] || 'Weather code: ' + code;
+}
+
+// Fetch live weather data for the Lilydale-Warburton trail area
+function loadLiveWeather() {
+  var latitude = -37.78;
+  var longitude = 145.55;
+
+  var weatherUrl =
+    'https://api.open-meteo.com/v1/forecast' +
+    '?latitude=' + latitude +
+    '&longitude=' + longitude +
+    '&current_weather=true' +
+    '&timezone=Australia%2FSydney';
+
+  fetch(weatherUrl)
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      var weather = data.current_weather;
+
+      weatherPanel.innerHTML = `
+        <b>Live Trail Weather</b><br>
+        Location: Lilydale-Warburton Rail Trail<br>
+        Temperature: ${weather.temperature} °C<br>
+        Wind speed: ${weather.windspeed} km/h<br>
+        Wind direction: ${weather.winddirection}°<br>
+        Condition: ${getWeatherDescription(weather.weathercode)}<br>
+        Updated: ${weather.time}
+      `;
+    })
+    .catch(function(error) {
+      weatherPanel.innerHTML = `
+        <b>Live Trail Weather</b><br>
+        Weather API could not be loaded.
+      `;
+      console.log('Weather API error:', error);
+    });
+}
+
+loadLiveWeather();
